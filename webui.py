@@ -43,14 +43,69 @@ import gradio as gr
 # Chemins du projet & imports des modules ComptaAI existants
 # ---------------------------------------------------------------------------
 
-SRC_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def _locate_src_dir(script_dir: Path) -> Path:
+    """Localise le dossier contenant les modules du projet (`utils.py`,
+    `dataset.py`, `prompt.py`, `train.py`), quel que soit l'endroit d'où
+    `webui.py` est exécuté.
+
+    Gère notamment le cas d'un clone Git imbriqué par erreur dans
+    lui-même (ex. `ComptaAI/ComptaAI/ComptaAI/webui.py`), où `webui.py`
+    ne se trouve pas forcément à côté des autres modules.
+    """
+    required = ("utils.py", "dataset.py", "prompt.py", "train.py")
+
+    # 1. Cas standard : webui.py est dans src/, aux côtés des autres modules
+    if all((script_dir / f).exists() for f in required):
+        return script_dir
+
+    # 2. Cas où webui.py est à la racine du projet, modules dans src/
+    if all((script_dir / "src" / f).exists() for f in required):
+        return script_dir / "src"
+
+    # 3. Recherche en profondeur (jusqu'à 6 niveaux) : gère les clones
+    #    imbriqués ou toute autre disposition inhabituelle du repo.
+    for depth_root in [script_dir, script_dir.parent, script_dir.parent.parent]:
+        if not depth_root.exists():
+            continue
+        for utils_path in depth_root.rglob("utils.py"):
+            candidate = utils_path.parent
+            if all((candidate / f).exists() for f in required):
+                return candidate
+
+    raise FileNotFoundError(
+        "Impossible de localiser les modules du projet (utils.py, dataset.py, "
+        "prompt.py, train.py). Vérifiez que webui.py se trouve bien dans le "
+        "dossier src/ du projet ComptaAI, aux côtés de ces fichiers, et que "
+        "l'arborescence n'a pas été clonée de façon imbriquée/dupliquée."
+    )
+
+
+def _locate_default_config(project_root: Path) -> str:
+    """Localise `configs/qwen_lora.yaml` en partant de `project_root`,
+    avec une recherche de secours en cas d'arborescence non standard."""
+    standard_path = project_root / "configs" / "qwen_lora.yaml"
+    if standard_path.exists():
+        return str(standard_path)
+
+    for candidate in project_root.rglob("qwen_lora.yaml"):
+        return str(candidate)
+
+    # Aucun fichier trouvé : on retourne quand même le chemin standard,
+    # l'interface affichera une erreur explicite dans l'onglet Configuration.
+    return str(standard_path)
+
+
+SRC_DIR = _locate_src_dir(SCRIPT_DIR)
 PROJECT_ROOT = SRC_DIR.parent
 sys.path.insert(0, str(SRC_DIR))
 
 from utils import load_yaml_config, generate_timestamp  # noqa: E402
 from dataset import load_jsonl_dataset, dataset_statistics  # noqa: E402
 
-DEFAULT_CONFIG_PATH = str(PROJECT_ROOT / "configs" / "qwen_lora.yaml")
+DEFAULT_CONFIG_PATH = _locate_default_config(PROJECT_ROOT)
 TRAIN_SCRIPT_PATH = str(SRC_DIR / "train.py")
 
 
