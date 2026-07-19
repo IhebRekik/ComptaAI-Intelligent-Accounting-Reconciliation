@@ -99,3 +99,15 @@ generation:
   top_k: 50
   repetition_penalty: 1.1
   do_sample: true
+
+# -----------------------------------------------------------------------------
+# Interface Web de supervision (utilisée par webui.py)
+# -----------------------------------------------------------------------------
+webui:
+  server_port: 7860
+  use_ngrok: true
+  # Jeton d'authentification ngrok. Peut aussi être fourni via la variable
+  # d'environnement NGROK_AUTHTOKEN (recommandé pour ne pas committer de secret).
+  ngrok_authtoken: ""
+  log_tail_lines: 300          # nombre de lignes de logs conservées/affichées dans la console
+  refresh_interval_seconds: 2  # fréquence de rafraîchissement du tableau de bord

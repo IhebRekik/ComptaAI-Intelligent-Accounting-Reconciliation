@@ -17,6 +17,11 @@ numpy>=1.26.0
 # Suivi d'entraînement
 tensorboard>=2.17.0
 
+# Interface Web de supervision (webui.py)
+gradio>=4.44.0
+pyngrok>=7.2.0
+huggingface_hub>=0.24.0
+
 # Qualité de code (optionnel, dev)
 black>=24.0.0
 flake8>=7.0.0

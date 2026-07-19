@@ -24,7 +24,8 @@ ComptaAI/
 │   ├── prompt.py             # Construction des prompts (build_training_prompt)
 │   ├── utils.py               # Fonctions utilitaires génériques
 │   ├── evaluation.py         # Évaluation post-entraînement
-│   └── inference.py          # Utilisation du modèle en production
+│   ├── inference.py          # Utilisation du modèle en production
+│   └── webui.py              # Tableau de bord Gradio de supervision du fine-tuning
 ├── checkpoints/              # Checkpoints d'entraînement (généré)
 ├── logs/                     # Logs TensorBoard (généré)
 ├── lora/                     # Adaptateurs LoRA entraînés (généré)
@@ -111,6 +112,33 @@ reponse = assistant.generate("Comment comptabiliser une note de frais ?")
 print(reponse)
 ```
 
+## 🌐 Interface Web de supervision (Google Colab)
+
+`webui.py` fournit un tableau de bord Gradio pour piloter et superviser le
+fine-tuning **sans utiliser le terminal**. Ce n'est pas un chatbot : il ne
+sert qu'à lancer, suivre et gérer l'entraînement (`train.py`).
+
+```bash
+cd src
+python webui.py
+```
+
+Une URL publique ngrok s'affiche dans la console (nécessite un compte
+ngrok gratuit). Renseignez votre jeton dans `configs/qwen_lora.yaml`
+(section `webui.ngrok_authtoken`) ou via la variable d'environnement
+`NGROK_AUTHTOKEN` :
+
+```bash
+export NGROK_AUTHTOKEN="votre_token_ngrok"
+```
+
+Le tableau de bord propose : informations système (GPU, CUDA, Google
+Drive), vérification de la configuration, téléchargement du modèle de
+base, statistiques et validation des datasets, démarrage / reprise /
+arrêt de l'entraînement avec suivi temps réel (loss, learning rate,
+progression, ETA, mémoire GPU) et console de logs, ainsi que la gestion
+des checkpoints.
+
 ## 🧩 Architecture technique
 
 - **Modèle de base** : Qwen3-8B, chargé en quantification 4 bits via `FastLanguageModel.from_pretrained()` (Unsloth)
@@ -121,4 +149,3 @@ print(reponse)
 ## 📄 Licence
 
 Projet à but pédagogique / professionnel. Adaptez cette section selon la licence choisie.
-"# ComptaAI-Intelligent-Accounting-Reconciliation" 
