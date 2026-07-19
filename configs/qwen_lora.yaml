@@ -1,0 +1,101 @@
+# =============================================================================
+# qwen_lora.yaml
+# Fichier de configuration unique du projet ComptaAI.
+# Toutes les valeurs utilisées par les modules du projet (train.py, dataset.py,
+# prompt.py, utils.py, evaluation.py, inference.py) doivent provenir de ce
+# fichier afin de garantir une source unique de configuration.
+# =============================================================================
+
+project:
+  name: "ComptaAI"
+  description: "Assistant IA spécialisé en comptabilité, fine-tuné sur Qwen3-8B avec LoRA."
+  version: "1.0.0"
+  author: "ComptaAI Team"
+
+# -----------------------------------------------------------------------------
+# Modèle de base
+# -----------------------------------------------------------------------------
+model:
+  name: "unsloth/Qwen3-8B-unsloth-bnb-4bit"   # Modèle chargé via FastLanguageModel.from_pretrained()
+  max_seq_length: 2048
+  dtype: null              # null = détection automatique (bf16/fp16 selon le GPU)
+  load_in_4bit: true       # Quantification 4 bits (BitsAndBytes) pour économiser la VRAM
+
+# -----------------------------------------------------------------------------
+# Jeux de données
+# -----------------------------------------------------------------------------
+data:
+  train_path: "dataset/train.jsonl"
+  val_path: "dataset/validation.jsonl"
+  test_path: "dataset/test.jsonl"
+  max_samples: null        # null = pas de limite, sinon entier pour du debug rapide
+  shuffle: true
+  min_response_length: 1   # longueur minimale (en caractères) d'une réponse valide
+
+# -----------------------------------------------------------------------------
+# Répertoires du projet (créés automatiquement par train.py / utils.py)
+# -----------------------------------------------------------------------------
+directories:
+  checkpoint_dir: "checkpoints"
+  logs_dir: "logs"
+  lora_dir: "lora"
+  merged_dir: "merged_model"
+  output_dir: "outputs"
+
+# -----------------------------------------------------------------------------
+# Paramètres LoRA (PEFT)
+# -----------------------------------------------------------------------------
+lora:
+  r: 16
+  lora_alpha: 16
+  lora_dropout: 0.0
+  bias: "none"
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+  use_gradient_checkpointing: "unsloth"
+
+# -----------------------------------------------------------------------------
+# Hyperparamètres d'entraînement (SFTTrainer / TrainingArguments)
+# -----------------------------------------------------------------------------
+training:
+  seed: 42
+  num_epochs: 3
+  batch_size: 2
+  eval_batch_size: 2
+  gradient_accumulation_steps: 4
+  learning_rate: 0.0002
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.03
+  weight_decay: 0.01
+  optimizer: "adamw_8bit"
+  fp16: true
+  bf16: false
+  logging_steps: 10
+  save_strategy: "steps"
+  save_steps: 100
+  save_total_limit: 3
+  eval_strategy: "steps"
+  eval_steps: 100
+  report_to:
+    - "tensorboard"
+  load_best_model_at_end: true
+  dataset_text_field: "text"
+  packing: false
+  merge_after_training: true
+
+# -----------------------------------------------------------------------------
+# Paramètres de génération (utilisés par inference.py)
+# -----------------------------------------------------------------------------
+generation:
+  max_new_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+  top_k: 50
+  repetition_penalty: 1.1
+  do_sample: true

@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+build/
+dist/
+*.egg
+
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+
+# Artefacts d'entraînement (volumineux, générés localement)
+checkpoints/
+logs/
+lora/
+merged_model/
+outputs/
+
+# Modèles et poids
+*.bin
+*.safetensors
+*.pt
+*.gguf
+
+# Fichiers d'environnement / secrets
+.env
+*.key
+
+# Système
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

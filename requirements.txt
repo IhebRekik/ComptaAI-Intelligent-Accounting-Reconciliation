@@ -1,0 +1,22 @@
+# Cœur ML / entraînement
+torch>=2.1.0
+transformers>=4.44.0
+trl>=0.9.6
+peft>=0.12.0
+datasets>=2.20.0
+accelerate>=0.33.0
+bitsandbytes>=0.43.0
+
+# Unsloth (fine-tuning rapide et léger en mémoire)
+unsloth @ git+https://github.com/unslothai/unsloth.git
+
+# Configuration & utilitaires
+pyyaml>=6.0.1
+numpy>=1.26.0
+
+# Suivi d'entraînement
+tensorboard>=2.17.0
+
+# Qualité de code (optionnel, dev)
+black>=24.0.0
+flake8>=7.0.0
